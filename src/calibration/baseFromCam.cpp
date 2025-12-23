@@ -1,80 +1,112 @@
 #include <Eigen/Dense>
-#include <opencv2/opencv.hpp>
-#include <vector>
 #include <iostream>
+#include <vector>
+#include <cmath>
 
 using namespace Eigen;
+using namespace std;
 
-struct DHParameter {
-    double a;
-    double alpha;
-    double d;
-    double theta;
+/* =========================
+   Utility: invert transform
+   ========================= */
+Matrix4d invertTF(const Matrix4d& T) {
+    Matrix4d inv = Matrix4d::Identity();
+    inv.block<3,3>(0,0) = T.block<3,3>(0,0).transpose();
+    inv.block<3,1>(0,3) =
+        -inv.block<3,3>(0,0) * T.block<3,1>(0,3);
+    return inv;
+}
+
+/* =========================
+   DH + Forward Kinematics
+   ========================= */
+struct DH {
+    double a, alpha, d, theta;
 };
 
-Matrix4d computeDHMatrix(const DHParameter& dh) {
-    double c_theta = cos(dh.theta);
-    double s_theta = sin(dh.theta);
-    double c_alpha = cos(dh.alpha);
-    double s_alpha = sin(dh.alpha);
-    
+Matrix4d dhMatrix(const DH& p) {
     Matrix4d T = Matrix4d::Identity();
-    T(0,0) = c_theta;
-    T(0,1) = -s_theta * c_alpha;
-    T(0,2) = s_theta * s_alpha;
-    T(0,3) = dh.a * c_theta;
-    
-    T(1,0) = s_theta;
-    T(1,1) = c_theta * c_alpha;
-    T(1,2) = -c_theta * s_alpha;
-    T(1,3) = dh.a * s_theta;
-    
-    T(2,1) = s_alpha;
-    T(2,2) = c_alpha;
-    T(2,3) = dh.d;
-    
+    double ct = cos(p.theta), st = sin(p.theta);
+    double ca = cos(p.alpha), sa = sin(p.alpha);
+
+    T << ct, -st*ca,  st*sa, p.a*ct,
+         st,  ct*ca, -ct*sa, p.a*st,
+          0,      sa,     ca,     p.d,
+          0,       0,      0,      1;
     return T;
 }
 
-Matrix4d getBaseFromCam(const cv::Mat& cameraFrame, 
-                       const std::vector<DHParameter>& dhTable,
-                       const Matrix4d& T_cam_marker) {
-    Matrix4d T_base_eef = Matrix4d::Identity();
-    
-    for (const auto& dh : dhTable) {
-        T_base_eef *= computeDHMatrix(dh);
-    }
-    
-    Matrix4d T_base_world = T_base_eef * T_cam_marker;
-    return T_base_world;
+Matrix4d forwardKinematics(const vector<DH>& dh) {
+    Matrix4d T = Matrix4d::Identity();
+    for (const auto& j : dh)
+        T *= dhMatrix(j);
+    return T;
 }
 
+/* =========================
+   Main
+   ========================= */
 int main() {
-    // Define DH parameters (6-DOF robot)
-    // theta, d , a, alpha
-    std::vector<DHParameter> dhTable = {
-        {0.0, 0.0, 0.5, 0.0},      // Joint 1
-        {0.3, 0.0, 0.0, 0.5},      // Joint 2
-        {0.3, 0.0, 0.0, 0.2},      // Joint 3
-        {0.0, 1.57, 0.2, 0.0},     // Joint 4
-        {0.0, -1.57, 0.0, 0.0},    // Joint 5
-        {0.0, 0.0, 0.1, 0.0}       // Joint 6
+
+    /* -------------------------
+       TRUE base pose in world
+       (this is the "idea" truth)
+       ------------------------- */
+    Matrix4d T_W_B_true = Matrix4d::Identity();
+    T_W_B_true.block<3,3>(0,0) =
+        AngleAxisd(0.4, Vector3d::UnitZ()).toRotationMatrix();
+    T_W_B_true.block<3,1>(0,3) << 1.0, 0.5, 0.0;
+
+    /* -------------------------
+       Joint angles (known)
+       ------------------------- */
+    vector<DH> dh = {
+        {0.0,  M_PI/2, 0.4,  0.3},
+        {0.3,  0.0,    0.0, -0.6},
+        {0.2,  0.0,    0.0,  0.5},
+        {0.0,  M_PI/2, 0.2,  1.0},
+        {0.0, -M_PI/2, 0.0, -0.7},
+        {0.0,  0.0,    0.1,  0.4}
     };
 
+    Matrix4d T_B_E = forwardKinematics(dh);
 
-    
-    // Known transformation from camera to end-effector
-    Matrix4d T_eef_cam = Matrix4d::Identity();
-    T_eef_cam.block<3,3>(0,0) = AngleAxisd(0.1, Vector3d::UnitZ()).toRotationMatrix();
-    T_eef_cam.block<3,1>(0,3) = Vector3d(0.05, 0.05, 0.1);
-    
-    // Dummy camera frame (can be replaced with actual frame data)
-    cv::Mat cameraFrame(480, 640, CV_8UC3);
-    
-    // Compute base to world transformation
-    Matrix4d T_base_world = getBaseFromCam(cameraFrame, dhTable, T_eef_cam);
-    
-    std::cout << "Base to World Transformation:\n" << T_base_world << std::endl;
-    
+    /* -------------------------
+       Hand-eye calibration
+       E → C
+       ------------------------- */
+    Matrix4d T_E_C = Matrix4d::Identity();
+    T_E_C.block<3,3>(0,0) =
+        AngleAxisd(0.2, Vector3d::UnitY()).toRotationMatrix();
+    T_E_C.block<3,1>(0,3) << 0.05, 0.03, 0.08;
+
+    /* -------------------------
+       What camera observes
+       (simulated measurement)
+       ------------------------- */
+    Matrix4d T_W_C =
+        T_W_B_true * T_B_E * T_E_C;
+
+    /* -------------------------
+       Reconstruct base from camera
+       ------------------------- */
+    Matrix4d T_C_E = invertTF(T_E_C);
+    Matrix4d T_E_B = invertTF(T_B_E);
+
+    Matrix4d T_W_B_calc =
+        T_W_C * T_C_E * T_E_B;
+
+    /* -------------------------
+       Results
+       ------------------------- */
+    cout << "\n=== TRUE World → Base ===\n";
+    cout << T_W_B_true << "\n";
+
+    cout << "\n=== CALCULATED World → Base ===\n";
+    cout << T_W_B_calc << "\n";
+
+    cout << "\n=== ERROR (calc - true) ===\n";
+    cout << T_W_B_calc - T_W_B_true << "\n";
+
     return 0;
 }
