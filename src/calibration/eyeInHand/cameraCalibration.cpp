@@ -222,7 +222,7 @@ int main() {
             poseIndex = "0" + to_string(i);            
         }else poseIndex = to_string(i);
 
-        string file_path = "/home/allen/capstone/calibration/src/calibration/examples/calib1211/poses/poses" + poseIndex + ".txt";
+        string file_path = "/home/allen/capstone/calibration/src/calibration/eyeInHand/examples/calib1211/poses/poses" + poseIndex + ".txt";
 
         ifstream infile(file_path);
         Eigen::Matrix4d gripper_pose = Eigen::Matrix4d::Identity();
@@ -255,7 +255,7 @@ int main() {
             poseIndex = "0" + to_string(i);            
         }else poseIndex = to_string(i);
 
-        string file_path = "/home/allen/capstone/calibration/src/calibration/examples/calib1211/Images/img_raw" + poseIndex + ".png";
+        string file_path = "/home/allen/capstone/calibration/src/calibration/eyeInHand/eyeInHand/examples/calib1211/Images/img_raw" + poseIndex + ".png";
         
         Eigen::Matrix4d target_pose = Eigen::Matrix4d::Identity();
 
