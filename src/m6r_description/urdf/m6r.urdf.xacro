@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="m6r">
+
+    <xacro:include filename="m6r.xacro" />
+    <xacro:include filename="m6r.ros2_control.xacro"/>
+
+</robot>

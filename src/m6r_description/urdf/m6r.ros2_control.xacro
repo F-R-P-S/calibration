@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <ros2_control name="m6r" type="system">
+    <hardware>
+        <!-- By default, set up controllers for simulation. This won't work on real hardware -->
+         <!-- Initial value can be set to different values -->
+        <plugin>mock_components/GenericSystem</plugin>
+        <!-- <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+        <param name="joint_commands_topic">/isaac_joint_commands</param>
+        <param name="joint_state_topic">/isaac_joint_states</param> -->
+    </hardware>
+    <joint name="joint1">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+    </joint>
+    <joint name="joint2">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+    </joint>
+    <joint name="joint3">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+    </joint>
+    <joint name="joint4">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+    </joint>
+    <joint name="joint5">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+    </joint>
+    <joint name="joint6">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+    </joint>
+
+  </ros2_control>
+    
+</robot>

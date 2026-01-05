@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="m6r">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.001886 0.077658 4.2267E-10"
+        rpy="0 0 0" />
+      <mass
+        value="4.7424" />
+      <inertia
+        ixx="0.023491"
+        ixy="-0.00027982"
+        ixz="1.7111E-10"
+        iyy="0.02209"
+        iyz="5.259E-11"
+        izz="0.024355" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="waist_link">
+    <inertial>
+      <origin
+        xyz="0.01397 -0.015936 0.13297"
+        rpy="0 0 0" />
+      <mass
+        value="13.487" />
+      <inertia
+        ixx="0.10312"
+        ixy="-0.0027943"
+        ixz="-0.017519"
+        iyy="0.15426"
+        iyz="0.0041824"
+        izz="0.1509" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/waist_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/waist_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1"
+    type="revolute">
+    <origin
+      xyz="0 0 0.175"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="waist_link" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10"
+      velocity="50" />
+  </joint>
+  <link
+    name="shoulder_link">
+    <inertial>
+      <origin
+        xyz="-0.051376 0.041747 0.10108"
+        rpy="0 0 0" />
+      <mass
+        value="4.7638" />
+      <inertia
+        ixx="0.050589"
+        ixy="1.3908E-06"
+        ixz="0.020141"
+        iyy="0.066303"
+        iyz="-2.7104E-06"
+        izz="0.021199" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/shoulder_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/shoulder_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint2"
+    type="revolute">
+    <origin
+      xyz="0.1 0.094 0.175"
+      rpy="0 0.47024 0" />
+    <parent
+      link="waist_link" />
+    <child
+      link="shoulder_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10"
+      velocity="50" />
+  </joint>
+  <link
+    name="elbow_link">
+    <inertial>
+      <origin
+        xyz="-0.032446 -0.089942 -4.6879E-07"
+        rpy="0 0 0" />
+      <mass
+        value="3.1983" />
+      <inertia
+        ixx="0.011223"
+        ixy="-0.00041339"
+        ixz="-6.0881E-08"
+        iyy="0.010279"
+        iyz="-6.8224E-08"
+        izz="0.014656" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/elbow_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/elbow_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint3"
+    type="revolute">
+    <origin
+      xyz="-0.12007 0 0.23624"
+      rpy="3.1416 -1.1006 3.1416" />
+    <parent
+      link="shoulder_link" />
+    <child
+      link="elbow_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10"
+      velocity="50" />
+  </joint>
+  <link
+    name="forearm_link">
+    <inertial>
+      <origin
+        xyz="0.10468 -3.9216E-05 -5.056E-06"
+        rpy="0 0 0" />
+      <mass
+        value="3.5743" />
+      <inertia
+        ixx="0.015239"
+        ixy="1.0219E-05"
+        ixz="-2.9814E-06"
+        iyy="0.020979"
+        iyz="-1.7512E-07"
+        izz="0.030802" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/forearm_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/forearm_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint4"
+    type="revolute">
+    <origin
+      xyz="0.044963 -0.094 0"
+      rpy="0 0 0" />
+    <parent
+      link="elbow_link" />
+    <child
+      link="forearm_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10"
+      velocity="50" />
+  </joint>
+  <link
+    name="wriste_pitch">
+    <inertial>
+      <origin
+        xyz="-0.01713 6.1831E-16 -1.3878E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.29578" />
+      <inertia
+        ixx="0.00018202"
+        ixy="1.8782E-20"
+        ixz="2.4432E-20"
+        iyy="0.00031068"
+        iyz="-6.232E-21"
+        izz="0.00030866" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/wriste_pitch.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/wriste_pitch.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint5"
+    type="revolute">
+    <origin
+      xyz="0.22504 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="forearm_link" />
+    <child
+      link="wriste_pitch" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10"
+      velocity="50" />
+  </joint>
+  <link
+    name="wriste_roll">
+    <inertial>
+      <origin
+        xyz="0.037109 -4.1633E-16 -2.8774E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.16216" />
+      <inertia
+        ixx="8.199E-05"
+        ixy="4.2483E-19"
+        ixz="1.1467E-07"
+        iyy="7.8296E-05"
+        iyz="-9.4868E-20"
+        izz="7.8412E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/wriste_roll.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://m6r_description/meshes/wriste_roll.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint6"
+    type="revolute">
+    <origin
+      xyz="0.01 0 0"
+      rpy="-1.9321 0 0" />
+    <parent
+      link="wriste_pitch" />
+    <child
+      link="wriste_roll" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="10"
+      velocity="50" />
+  </joint>
+</robot>

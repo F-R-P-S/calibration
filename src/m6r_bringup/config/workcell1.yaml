@@ -1,0 +1,65 @@
+obstacles:
+  - id: "workbench_surface"
+    type: "box"
+    frame: "world"
+    dimensions: [1.0, 0.8, 0.02]  # length, width, height
+    position:
+      x: 0.5
+      y: 0.0
+      z: 0.0
+    orientation:
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+  
+  - id: "l_horizontal"
+    type: "box"
+    frame: "world"
+    dimensions: [0.20, 0.05, 0.70]
+    position:
+      x: 0.30
+      y: 0.40
+      z: 0.35
+    orientation:
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+  
+  - id: "l_vertical_1"
+    type: "box"
+    frame: "world"
+    dimensions: [0.05, 0.30, 0.30]
+    position:
+      x: 0.38
+      y: 0.025
+      z: 0.15
+    orientation:
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+  
+  - id: "l_vertical_2"
+    type: "box"
+    frame: "world"
+    dimensions: [0.05, 0.30, 0.30]
+    position:
+      x: 0.68
+      y: 0.025
+      z: 0.15
+    orientation:
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
+  
+  - id: "safety_wall"
+    type: "box"
+    frame: "world"
+    dimensions: [0.01, 2.0, 1.5]  # Thin wall
+    position:
+      x: -0.9
+      y: 0.0
+      z: 0.75
+    orientation:
+      roll: 0.0
+      pitch: 0.0
+      yaw: 0.0
