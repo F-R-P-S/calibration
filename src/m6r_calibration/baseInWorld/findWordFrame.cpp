@@ -1,210 +1,227 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <std_msgs/msg/float64_multi_array.hpp>
-#include <fstream>
-#include <sstream>
+#include <geometry_msgs/msg/pose.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+
+#include <Eigen/Dense>
+
 #include <vector>
-#include <filesystem>
-#include <iomanip>
-#include <chrono>
+#include <thread>
+#include <cmath>
+#include <iostream>
+#include <cstdlib>
 
+// =====================================================
+// Degree-based trig (MATCHES YOUR FK)
+// =====================================================
+inline double COSD(double x) { return cos(x * M_PI / 180.0); }
+inline double SIND(double x) { return sin(x * M_PI / 180.0); }
 
-void record_high_frequency_trajectory(
-    const moveit::planning_interface::MoveGroupInterface::Plan& plan,
-    const std::string& filename,
-    double target_delta_ms,
-    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr joint_pub,
-    rclcpp::Logger logger)
+// =====================================================
+// DH definition
+// =====================================================
+struct DHParam {
+  double a;      // mm
+  double alpha;  // deg
+  double d;      // mm
+  double theta_offset;
+};
+
+// =====================================================
+// Standard DH Transform (degrees, mm)
+// =====================================================
+Eigen::Matrix4d dhTransform(const DHParam& p, double theta_deg)
 {
-    // Generate timestamped filename
-    auto now = std::chrono::system_clock::now();
-    auto now_time_t = std::chrono::system_clock::to_time_t(now);
-    std::stringstream ss;
-    std::string folder = "output_logs/";
-    
-    std::filesystem::create_directories(folder);
-    
-    ss << folder << filename << "_"
-       << std::put_time(std::localtime(&now_time_t), "%Y%m%d_%H%M%S") << ".txt"; 
-    
-    std::ofstream log_file(ss.str(), std::ios::out);
-    if (!log_file.is_open()) {
-        RCLCPP_ERROR(logger, "Failed to open %s for writing!", ss.str().c_str());
-        return;
-    }
+  double ct = COSD(theta_deg);
+  double st = SIND(theta_deg);
+  double ca = COSD(p.alpha);
+  double sa = SIND(p.alpha);
 
-    const auto& trajectory = plan.trajectory_.joint_trajectory;
-    size_t num_joints = trajectory.joint_names.size();
-    
-    // Write header with format description
-    log_file << "# High-frequency interpolated trajectory for motor control\n";
-    log_file << "# Format: time(s) delta_time(ms) joint1(rad) joint2(rad) ... joint6(rad)\n";
-    log_file << "# Target update rate: " << (1000.0/target_delta_ms) << " Hz (" << target_delta_ms << " ms)\n";
-    log_file << "# Joint names: ";
-    for (const auto& name : trajectory.joint_names) {
-        log_file << name << " ";
-    }
-    log_file << "\n#\n";
+  Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
 
-    if (trajectory.points.size() < 2) {
-        RCLCPP_WARN(logger, "Trajectory has fewer than 2 points, cannot interpolate");
-        log_file.close();
-        return;
-    }
+  T(0,0) = ct;        T(0,1) = -st * ca;   T(0,2) =  st * sa;   T(0,3) = p.a * ct;
+  T(1,0) = st;        T(1,1) =  ct * ca;   T(1,2) = -ct * sa;   T(1,3) = p.a * st;
+  T(2,1) = sa;        T(2,2) =  ca;        T(2,3) = p.d;
 
-    // Calculate trajectory parameters
-    double total_duration = rclcpp::Duration(trajectory.points.back().time_from_start).seconds();
-    double target_delta_s = target_delta_ms / 1000.0;
-    
-    size_t interpolated_count = 0;
-    double current_time = 0.0;
-    double previous_time = 0.0;
-    
-    // Interpolate trajectory at fixed time intervals
-    while (current_time <= total_duration) {
-        // Find which two waypoints we're currently between
-        size_t idx = 0;
-        for (size_t i = 0; i < trajectory.points.size() - 1; ++i) {
-            double t1 = rclcpp::Duration(trajectory.points[i].time_from_start).seconds();
-            double t2 = rclcpp::Duration(trajectory.points[i + 1].time_from_start).seconds();
-            
-            if (current_time >= t1 && current_time <= t2) {
-                idx = i;
-                break;
-            }
-        }
-        
-        // Handle edge case at end of trajectory
-        if (current_time >= total_duration) {
-            idx = trajectory.points.size() - 2;
-        }
-        
-        // Get the two waypoints we're interpolating between
-        const auto& p1 = trajectory.points[idx];
-        const auto& p2 = trajectory.points[idx + 1];
-        
-        double t1 = rclcpp::Duration(p1.time_from_start).seconds();
-        double t2 = rclcpp::Duration(p2.time_from_start).seconds();
-        
-        // Calculate interpolation factor (0.0 to 1.0)
-        // alpha = 0.0 means we're at p1, alpha = 1.0 means we're at p2
-        double alpha = (t2 - t1) > 0 ? (current_time - t1) / (t2 - t1) : 0.0;
-        alpha = std::max(0.0, std::min(1.0, alpha));
-        
-        // Calculate time delta since last update
-        double delta_time_ms = (current_time - previous_time) * 1000.0;
-        
-        // Write: timestamp, delta_time, joint positions
-        // log_file << std::fixed << std::setprecision(6) << current_time << " ";
-        // log_file << std::fixed << std::setprecision(2) << delta_time_ms << " ";
-        
-        // Linear interpolation for each joint: pos = p1 + alpha * (p2 - p1)
-        for (size_t j = 0; j < num_joints; ++j) {
-            double interpolated = p1.positions[j] + alpha * (p2.positions[j] - p1.positions[j]);
-            log_file << std::fixed << std::setprecision(6) << interpolated;
-
-            if (j < num_joints - 1) log_file << " ";
-        }
-        log_file << "\n";
-        
-        interpolated_count++;
-        previous_time = current_time;
-        current_time += target_delta_s;
-    }
-
-    log_file.close();
-    
+  return T;
 }
 
+// =====================================================
+// Forward Kinematics using YOUR DH
+// =====================================================
+Eigen::Matrix4d forwardKinematics(
+    const std::vector<double>& joint_deg,
+    const std::vector<DHParam>& dh)
+{
+  Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
+  for (size_t i = 0; i < dh.size(); ++i) {
+    T *= dhTransform(dh[i], joint_deg[i] + dh[i].theta_offset);
+  }
+  return T;
+}
 
+// =====================================================
+// Fake AprilTag detection
+// =====================================================
+bool fakeAprilTagDetected()
+{
+  return true;
+}
+
+// =====================================================
+// Simple noise helper (mm)
+// =====================================================
+double noise_mm(double stddev = 1.0)
+{
+  return ((double)rand() / RAND_MAX - 0.5) * 2.0 * stddev;
+}
+
+// =====================================================
+// MAIN
+// =====================================================
 int main(int argc, char **argv)
 {
-    // initialize ROS2
-    rclcpp::init(argc, argv);
+  rclcpp::init(argc, argv);
+  auto node = std::make_shared<rclcpp::Node>("test_moveit");
 
-    auto node = std::make_shared<rclcpp::Node>("test_moveit");
-    auto joint_pub = node->create_publisher<std_msgs::msg::Float64MultiArray>("/joint_angles", 10);
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+  std::thread spinner([&executor]() { executor.spin(); });
 
-    //change robot to search mode
-    double j1 = node->declare_parameter<double>("joint_1", 0.0);
-    double j2 = node->declare_parameter<double>("joint_2", 0.75);
-    double j3 = node->declare_parameter<double>("joint_3", 2.2);
-    double j4 = node->declare_parameter<double>("joint_4", 0.0);
-    double j5 = node->declare_parameter<double>("joint_5", 0.0);
-    double j6 = node->declare_parameter<double>("joint_6", 0.0);
+  auto arm = moveit::planning_interface::MoveGroupInterface(node, "arm");
+  arm.setMaxVelocityScalingFactor(1.0);
+  arm.setMaxAccelerationScalingFactor(1.0);
 
-    bool log = node->declare_parameter<bool>("log", true);
+  // -----------------------------------------------------
+  // Initial joint move (UNCHANGED)
+  // -----------------------------------------------------
+  std::vector<double> joints_init = {0.0, 0.75, 2.2, 0.0, 0.0, 0.0};
+  arm.setStartStateToCurrentState();
+  arm.setJointValueTarget(joints_init);
 
-    rclcpp::executors::SingleThreadedExecutor executor; // create executor
-    executor.add_node(node); // add node to executor
-    auto spinner = std::thread([&executor]() { executor.spin(); });// create thread and make it spin
+  moveit::planning_interface::MoveGroupInterface::Plan plan1;
+  if (arm.plan(plan1) == moveit::planning_interface::MoveItErrorCode::SUCCESS) {
+    arm.execute(plan1);
+  }
 
-    // Initialize MoveGroupInterface for the "arm" planning group
-    auto arm = moveit::planning_interface::MoveGroupInterface(node, "arm");
-    arm.setMaxVelocityScalingFactor(1.0);
-    arm.setMaxAccelerationScalingFactor(1.0);
+  // -----------------------------------------------------
+  // SEARCH MODE (UNCHANGED)
+  // -----------------------------------------------------
+  std::vector<geometry_msgs::msg::Pose> waypoints;
+  geometry_msgs::msg::Pose pose1 = arm.getCurrentPose().pose;
+  pose1.position.x += 0.2;
+  waypoints.push_back(pose1);
 
-    // set search mode
-    //Joint Goal
-    // std::vector<double> joints = {1.5, 0.5, -1.0, 0.0, 1.0, 0.0};
-    std::vector<double> joints = {j1, j2, j3, j4, j5, j6};
+  geometry_msgs::msg::Pose pose2 = pose1;
+  pose2.position.y += 0.2;
+  waypoints.push_back(pose2);
 
-    arm.setStartStateToCurrentState();
-    arm.setJointValueTarget(joints);
-    moveit::planning_interface::MoveGroupInterface::Plan plan1;
-    // Plan to the joint target
-    bool success1 = (arm.plan(plan1) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-    //execute the plan if successful
-    if (success1){ 
-        arm.execute(plan1);
-        // double target_hz = 50.0;
-        // double target_delta_ms = 1000.0 / target_hz;
-        // if (log) record_high_frequency_trajectory(plan1, "trajectory_high_freq", target_delta_ms, joint_pub, node->get_logger());
-    }
+  geometry_msgs::msg::Pose pose3 = pose2;
+  pose3.position.y -= 0.2;
+  pose3.position.x -= 0.2;
+  waypoints.push_back(pose3);
 
+  moveit_msgs::msg::RobotTrajectory trajectory;
+  double fraction = arm.computeCartesianPath(waypoints, 0.01, 0.0, trajectory);
 
-    // ===============================
-    // SEARCH MODE: Cartesian scanning
-    // ===============================
+  if (fraction > 0.95) {
+    moveit::planning_interface::MoveGroupInterface::Plan search_plan;
+    search_plan.trajectory_ = trajectory;
+    arm.execute(search_plan);
+  }
 
-    // define search path
-    std::vector<geometry_msgs::msg::Pose> waypoints;
-    geometry_msgs::msg::Pose pose1 = arm.getCurrentPose().pose;
-    pose1.position.x += 0.2;
-    waypoints.push_back(pose1);
-    geometry_msgs::msg::Pose pose2 = pose1;
-    pose2.position.y += 0.2;
-    waypoints.push_back(pose2); 
-    geometry_msgs::msg::Pose pose3 = pose2;
-    pose3.position.y += -0.2;
-    pose3.position.x += -0.2;
-    waypoints.push_back(pose3);
+  // =====================================================
+  // TRUE WORLD (SIMULATION-ONLY, HIDDEN FROM ALGORITHM)
+  // =====================================================
+  Eigen::Matrix4d T_world_true_base = Eigen::Matrix4d::Identity();
+  T_world_true_base(0,3) = 400.0;
+  T_world_true_base(1,3) = -200.0;
 
+  // unit: mm
+  Eigen::Matrix4d T_world_tag = Eigen::Matrix4d::Identity();
+  T_world_tag(0,3) = 1200.0;
+  T_world_tag(1,3) = 500.0;
+  T_world_tag(2,3) = 300.0;
 
-    moveit_msgs::msg::RobotTrajectory trajectory;
-    double fraction = arm.computeCartesianPath(waypoints, 0.01, 0.0, trajectory);
-    RCLCPP_INFO(node->get_logger(), "searching path computed (%.2f%% achieved)", fraction * 100.0);
+  Eigen::Matrix4d T_ee_cam = Eigen::Matrix4d::Identity();
+  T_ee_cam(2,3) = 80.0;
 
-    // execute the search path if successful
-    if (fraction > 0.95) {
-        RCLCPP_INFO(node->get_logger(), "start searching...");
+  // =====================================================
+  // TAG DETECTION + BASE CALIBRATION
+  // =====================================================
+  std::vector<Eigen::Matrix4d> world_base_estimates;
 
-        moveit::planning_interface::MoveGroupInterface::Plan search_plan;
-        search_plan.trajectory_ = trajectory;
+  for (int sample = 0; sample < 3; ++sample)
+  {
+    if (!fakeAprilTagDetected())
+      continue;
 
-        arm.execute(search_plan); 
-    }
+    RCLCPP_INFO(node->get_logger(),
+                "AprilTag detected, capturing joint state (sample %d)",
+                sample);
 
+    // Joint state from MoveIt
+    std::vector<double> joint_rad = arm.getCurrentJointValues();
 
+    std::vector<double> joint_deg(6);
+    for (int i = 0; i < 6; ++i)
+      joint_deg[i] = joint_rad[i] * 180.0 / M_PI;
 
-    // std::vector<double> tag = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    // DH table (YOUR VALUES)
+    std::vector<DHParam> dh_table = {
+        {  0.0,  90.0, 120.0, 0.0 },
+        {450.0,   0.0,   0.0, 0.0 },
+        {  0.0,   0.0,   0.0, 0.0 },
+        {  0.0,  90.0, 450.0, 0.0 },
+        {  0.0, -90.0,   0.0, 0.0 },
+        {  0.0,   0.0,  80.0, 0.0 }
+    };
 
-    // for now random decide if the location is determined or not
+    Eigen::Matrix4d T_base_ee = forwardKinematics(joint_deg, dh_table);
 
+    // Simulated camera measurement
+    // what the camera "sees" the tag as
+    Eigen::Matrix4d T_cam_tag =
+        T_ee_cam.inverse() *
+        T_base_ee.inverse() *
+        T_world_true_base.inverse() *
+        T_world_tag;
 
-    // calculate the robot base in the world
+    T_cam_tag(0,3) += noise_mm(1.0);
+    T_cam_tag(1,3) += noise_mm(1.0);
+    T_cam_tag(2,3) += noise_mm(1.0);
 
-    rclcpp::shutdown();
-    spinner.join();
-    return 0;
+    // Calibration equation
+    Eigen::Matrix4d T_world_base_est =
+        T_world_tag *
+        T_cam_tag.inverse() *
+        T_ee_cam.inverse() *
+        T_base_ee.inverse();
+
+    world_base_estimates.push_back(T_world_base_est);
+  }
+
+  // =====================================================
+  // AVERAGE + ERROR
+  // =====================================================
+  Eigen::Vector3d t_sum = Eigen::Vector3d::Zero();
+  for (auto& T : world_base_estimates)
+    t_sum += T.block<3,1>(0,3);
+
+  Eigen::Vector3d t_est = t_sum / world_base_estimates.size();
+  Eigen::Vector3d t_true = T_world_true_base.block<3,1>(0,3);
+
+  std::cout << "\nTRUE T_world_base (mm): "
+            << t_true.transpose() << std::endl;
+
+  std::cout << "EST  T_world_base (mm): "
+            << t_est.transpose() << std::endl;
+
+  std::cout << "POSITION ERROR (mm): "
+            << (t_est - t_true).norm() << std::endl;
+
+  rclcpp::shutdown();
+  spinner.join();
+  return 0;
 }
