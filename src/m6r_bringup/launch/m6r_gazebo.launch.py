@@ -19,6 +19,13 @@ def generate_launch_description():
     urdf_path = os.path.join(pkg_share_path, "urdf", "m6r.urdf.xacro")
     rviz_config_path = os.path.join(pkg_share_path, "rviz", "gazebo_bringup.rviz")
 
+
+    world_file_path = os.path.join(
+        get_package_share_directory("m6r_bringup"),
+        "world",
+        "eyeInHand.world"
+    )
+
     # =============================
     # Environment Variables
     # =============================
@@ -54,7 +61,7 @@ def generate_launch_description():
             "launch",
             "gazebo.launch.py"
         ]),
-        launch_arguments={'pause': 'false'}.items()
+        launch_arguments={'pause': 'false', 'world': world_file_path, 'verbose': 'true'}.items()
     )
 
     # =============================
