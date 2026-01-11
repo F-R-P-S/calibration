@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(m6r_moveit_config)
+project(m6r_mod_moveit_config2)
 
 find_package(ament_cmake REQUIRED)
 

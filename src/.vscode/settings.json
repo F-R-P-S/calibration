@@ -4,5 +4,6 @@
         "string": "cpp",
         "vector": "cpp",
         "core": "cpp"
-    }
+    },
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true
 }

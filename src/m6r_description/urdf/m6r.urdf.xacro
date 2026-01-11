@@ -1,7 +1,24 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="m6r">
 
-    <xacro:include filename="m6r.xacro" />
-    <xacro:include filename="m6r.ros2_control.xacro"/>
+    <!-- <xacro:include filename="m6r.xacro" /> -->
+    <!-- <xacro:include filename="m6r_0110.xacro"/>
+    <xacro:include filename="m6r.ros2_control.xacro"/> -->
 
+    <!-- <xacro:include filename="camera.xacro"/> -->
+
+    <link name="world"/>
+    
+    <joint name="world_to_base" type="fixed">
+        <parent link="world"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+        
+    <xacro:include filename="m6r_0110.xacro"/>
+    <xacro:include filename="gazebo.ros2_control.xacro"/>
+    <xacro:include filename="m6r.gazebo.xacro"/>
+
+    <xacro:include filename="camera2.xacro"/>
+   
 </robot>

@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>m6r_moveit_config</name>
+  <name>m6r_mod_moveit_config2</name>
   <version>0.3.0</version>
   <description>
      An automatically generated package with all the configuration and launch files for using the m6r with the MoveIt Motion Planning Framework
   </description>
-  <maintainer email="todo@todo.com">allen</maintainer>
+    <maintainer email="todo@todo.com">allen</maintainer>
+
 
   <license>BSD</license>
 
@@ -14,7 +15,7 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
-  <author email="todo@todo.com">allen</author>
+  <author email="tcl23@163.com">allen</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

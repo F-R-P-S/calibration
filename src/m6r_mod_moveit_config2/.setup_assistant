@@ -1,13 +1,13 @@
 moveit_setup_assistant_config:
   urdf:
     package: m6r_description
-    relative_path: urdf/m6r.urdf
+    relative_path: urdf/m6r_0110.urdf
   srdf:
     relative_path: config/m6r.srdf
   package_settings:
-    author_name: allen
-    author_email: todo@todo.com
-    generated_timestamp: 1763444031
+    author_name: ""
+    author_email: ""
+    generated_timestamp: 1768068806
   control_xacro:
     command:
       - position

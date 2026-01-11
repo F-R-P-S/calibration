@@ -9,7 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
-find_package(example_interfaces REQUIRED)
+# find_package(example_interfaces REQUIRED)
 # add custom package
 # find_package(m6r_interfaces REQUIRED)
 find_package(yaml-cpp REQUIRED)

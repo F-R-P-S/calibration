@@ -65,4 +65,7 @@ ros2 run m6r_commander_cpp collision_load   --ros-args   -p target_x:=0.6   -p t
 
 
 
+#require package
+
+sudo apt install ros-humble-gazebo-ros2-control
 

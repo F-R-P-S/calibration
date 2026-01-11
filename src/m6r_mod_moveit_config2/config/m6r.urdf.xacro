@@ -3,7 +3,7 @@
     <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
 
     <!-- Import m6r urdf file -->
-    <xacro:include filename="$(find m6r_description)/urdf/m6r.urdf" />
+    <xacro:include filename="$(find m6r_description)/urdf/m6r_0110.urdf" />
 
     <!-- Import control_xacro -->
     <xacro:include filename="m6r.ros2_control.xacro" />

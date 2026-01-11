@@ -29,7 +29,9 @@ def generate_launch_description():
     # Package paths
     m6r_description_share = FindPackageShare('m6r_description')
     m6r_bringup_share = FindPackageShare('m6r_bringup')
-    m6r_moveit_share = FindPackageShare('m6r_moveit_config')
+    # m6r_moveit_share = FindPackageShare('m6r_moveit_config')
+    m6r_moveit_share = FindPackageShare('m6r_mod_moveit_config2')
+
     
     # Paths
     urdf_path = PathJoinSubstitution([m6r_description_share, 'urdf', 'm6r.urdf.xacro'])
