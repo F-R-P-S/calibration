@@ -23,7 +23,13 @@ def generate_launch_description():
     world_file_path = os.path.join(
         get_package_share_directory("m6r_bringup"),
         "world",
-        "eyeInHand.world"
+        "eyeInHand.world"        
+    )
+
+    world_file_path2 = os.path.join(
+        get_package_share_directory("m6r_bringup"),
+        "world",
+        "charuco.world"        
     )
 
     # =============================
@@ -61,7 +67,7 @@ def generate_launch_description():
             "launch",
             "gazebo.launch.py"
         ]),
-        launch_arguments={'pause': 'false', 'world': world_file_path, 'verbose': 'true'}.items()
+        launch_arguments={'pause': 'false', 'world': world_file_path2, 'verbose': 'true'}.items()
     )
 
     # =============================
