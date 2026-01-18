@@ -164,7 +164,7 @@ Visualization Manager:
         wriste_pitch:
           Value: false
         wriste_roll:
-          Value: false
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -245,10 +245,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6653980016708374
+      Pitch: 0.6753979921340942
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.670402765274048
+      Yaw: 1.7154035568237305
     Saved: ~
 Window Geometry:
   Displays:
