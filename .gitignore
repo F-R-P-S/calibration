@@ -6,3 +6,4 @@ src/handeye_calibration_ros2_sim
 src/Hand-Eye-Calibration-Matlab
 src/m6r_calibration/eyeInHand/calib*
 src/m6r_calibration/eyeInHand/output*
+src/gazebo_models/

@@ -89,14 +89,14 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
-    <model name='Marker17'>
+    <model name='Marker10'>
       <static>1</static>
       <link name='link'>
         <visual name='visual'>
           <geometry>
             <mesh>
-              <uri>model://marker17/meshes/Marker17.dae</uri>
-              <scale>1 1 1</scale>
+              <uri>model://marker10/meshes/Marker10.dae</uri>
+              <scale>4 4 4</scale>
             </mesh>
           </geometry>
         </visual>
@@ -104,18 +104,45 @@
         <enable_wind>0</enable_wind>
         <kinematic>0</kinematic>
       </link>
-      <pose>1.39988 0.053026 0 0 -0 0</pose>
+      <pose>-5.1931 -1.76546 0 0 -0 0</pose>
+    </model>
+    <model name='Marker0_0'>
+      <static>1</static>
+      <link name='link'>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://marker0/meshes/Marker0.dae</uri>
+              <scale>0.28 0.28 0.28</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <pose>0.409515 -0.014495 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>72 141000000</sim_time>
-      <real_time>73 50995978</real_time>
-      <wall_time>1768166215 698988049</wall_time>
-      <iterations>72141</iterations>
-      <model name='Marker17'>
-        <pose>1.19047 0.03599 0 0 -1.56432 0</pose>
+      <sim_time>185 208000000</sim_time>
+      <real_time>185 561320523</real_time>
+      <wall_time>1768777438 263780355</wall_time>
+      <iterations>185208</iterations>
+      <model name='Marker0_0'>
+        <pose>0.6 -0 0.01 0 -1.54 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>1.19047 0.03599 0 0 -1.56432 0</pose>
+          <pose>0.6 0 0.01 0 -1.54 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='Marker10'>
+        <pose>-5.1931 -1.76546 0 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>-5.1931 -1.76546 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -137,7 +164,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>1.2579 -6.46367 3.38645 -0 0.347643 1.7602</pose>
+        <pose>0.628381 -0.975073 0.380911 0 0.319643 1.79219</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>

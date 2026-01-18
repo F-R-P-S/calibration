@@ -112,10 +112,10 @@
       <wall_time>1768178450 764714513</wall_time>
       <iterations>74620</iterations>
       <model name='charuco1'>
-        <pose>1.25338 -0.059845 0.028633 3.14159 -1.5693 3.14159</pose>
+        <pose>1 0 0.028633 3.14159 -1.5693 3.14159</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>1.25338 -0.059845 0.028633 3.14159 -1.5693 3.14159</pose>
+          <pose>1 0 0.028633 3.14159 -1.5693 3.14159</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
